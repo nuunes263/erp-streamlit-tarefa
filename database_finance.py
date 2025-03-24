@@ -70,25 +70,29 @@ def populate_fake_data():
     fake = Faker()
     conn = sqlite3.connect("erp_finance.db", detect_types=sqlite3.PARSE_DECLTYPES)
     cursor = conn.cursor()
-    
+
     for _ in range(10):
         cursor.execute("INSERT INTO clientes (nome, email, telefone) VALUES (?, ?, ?)",
                        (fake.name(), fake.email(), generate_brazilian_phone()))
-    
+
     for _ in range(10):
         cursor.execute("INSERT INTO contas_pagar (fornecedor, valor, vencimento, status) VALUES (?, ?, ?, ?)",
-                       (fake.company(), round(random.uniform(500, 5000), 2), fake.date_this_month(), random.choice(["Pendente", "Pago"])))
-    
+                       (fake.company(), round(random.uniform(500, 5000), 2), fake.date_between(start_date='-12M', end_date='today'), 
+                        random.choice(["Pendente", "Pago"])))
+
     for _ in range(10):
         cursor.execute("INSERT INTO contas_receber (cliente_id, valor, vencimento, status) VALUES (?, ?, ?, ?)",
-                       (random.randint(1, 10), round(random.uniform(500, 10000), 2), fake.date_this_month(), random.choice(["Pendente", "Recebido"])))
-    
-    for _ in range(10):
+                       (random.randint(1, 10), round(random.uniform(500, 10000), 2), fake.date_between(start_date='-12M', end_date='today'), 
+                        random.choice(["Pendente", "Recebido"])))
+
+    for _ in range(50):  # Aumentei o número de lançamentos para melhor análise de fluxo
         cursor.execute("INSERT INTO lancamentos (tipo, descricao, valor, data) VALUES (?, ?, ?, ?)",
-                       (random.choice(["Receita", "Despesa"]), fake.sentence(), round(random.uniform(100, 5000), 2), fake.date_this_month()))
-    
+                       (random.choice(["Receita", "Despesa"]), fake.sentence(), round(random.uniform(100, 5000), 2), 
+                        fake.date_between(start_date='-12M', end_date='today')))
+
     conn.commit()
     conn.close()
+
 
 
 #execução dos scripts
